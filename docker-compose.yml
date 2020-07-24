@@ -1,0 +1,47 @@
+version: "3.7"
+
+services:
+  dev:
+    image: gradle:5.6.3-jdk11
+    working_dir: /app
+    environment:
+      DB_HOST: postgres_base
+      DB_PORT: 5432
+      DB_NAME: book
+      DB_USER: book
+      DB_PASSWORD: book
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_JPA_SHOW_SQL: "true"
+    volumes:
+      - .:/app
+      - gradle-cache:/home/gradle/.gradle
+    networks:
+      app_net:
+    ports:
+      - 8080:8080
+      - 5007:5005
+    command: gradle bootRun
+    depends_on:
+      - postgres_base
+
+
+  postgres_base:
+    image: postgres:11.5
+    restart: always
+    environment:
+      POSTGRES_USER: book
+      POSTGRES_PASSWORD: book
+      POSTGRES_DB: book
+    networks:
+      - app_net
+    volumes:
+      - db-cache:/var/lib/postgresql/data
+    ports:
+      - 5439:5432
+
+networks:
+  app_net:
+
+volumes:
+  gradle-cache:
+  db-cache:
